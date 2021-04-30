@@ -1,0 +1,32 @@
+Justin Hee
+Professor Eggert
+CS 35L
+20 April 2021
+
+Assignment 2 Notes
+
+2.1:
+- compute 2^(3^4) using (expt 2 (expt 3 4))
+- if the above value fits into a 64 signed-bit integer, it must be < 2^63, so use the comparison (< (expt 2 (expt 3 4)) (expt 2 63)), which returns nil
+- also calculated 2^(3^4) using M-: (expt 2 (expt 3 4))
+- after typing C-h b and finding C-h k and M-SPC, it says that they are describe-key and just-one-space respectively.
+- C-h k C-h k gives the definition of C-h k, because C-h k itself runs the command describe-key, and then it's passed the argument of C-h k, so it describes itself
+- typing C-h k M-SPC pulls up the description of M-SPC because it passes M-SPC to the describe-key function.
+- trying M-SPC out, it deletes all the spaces but one around a point
+- using M-: (just-one-space 2), it deletes all the spaces but 2 around a point
+- C-u 2 M-x just-one-space deletes all the spaces but 2 around a point
+
+2.2:
+- my which-line.el file does the following (pseudocode)
+if point-min == point-max
+   numLines = 0
+else if last char is '\n'
+   numLines = total lines
+else //last char isn't '\n'
+   numLines = total lines - 1
+print "line {current line} of {numLines}"
+
+Homework: Python Scripting
+- if randline.py is invoked on an empty file like /dev/null, it returns that the list index is out of range and does not give any line. This is because it tries to open and read all the lines but there are no lines.
+- when randlin.py is invoked with Python3, it gives sytax errors because Python2 and Python3 are incompatible.
+- When my shuf.py is invoked with Python2 instead of Python3, there is a syntax error because the f-strings were modified between the versions.
