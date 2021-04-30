@@ -1,0 +1,68 @@
+Justin Hee
+Professor Eggert
+CS 35L
+11 April 2021
+
+Lab 1.5 Questions
+
+1. Using which mv sh, it is clear that they are located respectively in /usr/local/cs/bin/mv and /usr/bin/sh.
+
+2. I printed all of the two-character executable commands in /usr/bin ending in r using find /usr/bin -executable -name ?r -print. This outputted the commands /usr/bin/ar, /usr/bin/pr, and /usr/bin/tr. Then I looked up what they do using man /usr/bin/ar, man /usr/bin/pr, and man /usr/bin/tr.
+   /usr/bin/ar: creates, modifies, and extracts from archives (an archive being a single file holding a collection of other files 
+
+3. using ls -l on /usr/bin/emacs, we see that it is a symlink to /etc/alternatives/emacs. Going further, we can do ls -l /etc/alternatives/emacs and see that it is a symlink itself, this time going to /usr/bin/emacs-26.1. So, when you execute the command /usr/bin/emacs, it is actually executing /usr/bin/emacs-26.1.
+
+4. /usr/bin/gcc -v tells us that the version is 8.3.1. gcc -v tells us that the version is 10.2.0. These are different programs because we have prepended /usr/local/cs/bin to our path, so when gcc is called it calls /usr/local/cs/bin/gcc instead of /usr/bin/gcc. This is evident when we run which gcc, which returns /usr/local/cs/bin/gcc.
+
+5.The symbolic mode u+sx,o-w combines the two commands u+sx and o-w. u+sx makes the file executable, and executes it under the owner's id every time. o-w takes away write permissions from the "other" group, so they can't modify the contents of the file. 
+
+6. I used the command find /usr/local/cs -type d -mtime -28 to output all the directories under /usr/local/cs that have been modified in the last 4 weeks. Since there were so many, I then used the command find /usr/local/cs -type d -mtime -28 | wc -l to count the lines and return 370, meaning there are 370 directories in /usr/local/cs that have been modified in the last 4 weeks. The first five entries were:
+   /usr/local/cs
+   /usr/local/cs/.del
+   /usr/local/cs/.del/ocaml-4.11.1
+   /usr/local/cs/bin
+   /usr/local/cs/emacs-27.2
+
+7. First, I used which find to find out where find is located, which is /usr/bin/find. Then I used the command find /usr/bin -type l | wc -l to see that there are 248 symlinks in that directory. Using man wc, it is evident that wc is able to print newline, word, and byte counts for each file. The -l modifier prints the newline counts, and since find prints each result on a newline, it's easy to count the results with wc -l.
+
+8. To not ignore entries starting with ., use the option -a. To sort by time, newest first, use the option -t. To see the listed date, use the option -l to show the long form. I used the command ls /usr/lib64 -a -t -l, and the oldest file was listed last. It was libcrypt.so.1.1.0, modified August 12 2018.
+
+9. According to man locale, locale displays information about the current locale, or all locales, on standard output. It says that /usr/share/i18n/locales is the usual default path for locale definition files.
+
+10. I used C-h a downcase to find that the following commands in Emacs contain downcase
+    downcase-dwim	  M-x ... RET
+    downcase-region	C-x C-l
+    downcase-word	M-l
+
+
+11. I used C-h b to open all the Emacs keybindings, and then used C-s on each of C-M-r through C-M-v. Then I selected their descriptions, and found the following:
+    C-M-r  repeats incremental search backwards
+    C-M-s  does an incremental search forward for a regular expression
+    C-M-t  does a transpose on sexps (a sexp is a balanced expression), switching the positions of the previous and next balanced expression.
+    C-M-u  moves backward out of one level of parentheses, or other parentheses-like expressions
+    C-M-v  scrolls the next window upward
+
+12. I used C-h k C-g to find out more about C-g. C-g runs the command keyboard-quit. This causes a quit from the execution of the Lisp code, and plays a beeping sound.
+
+13. I used C-h b and then C-s yank to find that the yank command is called using C-y. Then I did C-h k C-y. The yank function reinserts the last bit of killed text. It's like the "paste" part of "cut and paste"
+
+14. First, I looked up dired using C-h f dired, and found that it does much of the same thing as ls, printing the files in a directory. Then I did both ls -l /usr/bin and C-x d /usr/bin to compare the outputs. When looking through the two outputs, it seemed like the only visible differences were that C-x d /usr/bin included the . and .. directories.
+
+
+
+Homework:
+
+What's does each of the commands do and how do they change?
+tr -c 'A-Za-z' '[\n*]'
+   replaces everything that wasn't a letter with a newline
+tr -cs 'A-Za-z' '[\n*]'
+   the -s command makes it so repeated characters are listed only once, effectively getting rid of the big patches of newlines
+tr -cs 'A-Za-z' '[\n*]' | sort
+   this now lists them in sorted order
+tr -cs 'A-Za-z' '[\n*]' | sort -u
+   the -u command makes it so words are not repeated
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - sorted.words
+   compares the sorted word output to sorted.words in 3 columns. The first is lines unique to the sorted word output, the 2nd is lines unique to the "dictionary", and the 3rd is lines that appear in both files
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - sorted.words
+   the -23 flag suppresses the 2nd and 3rd columns, so the only output is lines unique to the sorted word output
+

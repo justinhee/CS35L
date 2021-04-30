@@ -1,0 +1,79 @@
+Justin Hee
+Professor Eggert
+CS 35L
+29 April 2021
+
+Chorus Lapilli Notes
+- create a new react-app called chorus-lapilli, and copy in the tic-tac-toe code from the tutorial
+
+- add a four new states to Game
+  numMoves: starts out as 0, used to tell when to switch from tic-tac-toe to chorus-lapilli
+  firstClick: starts as true, used to keep track of whether we're selecting a source or destination for a move
+  selectedRow: the row number of the selected source
+  selectedCol: the column number of the selected source
+
+Setting the 3-turn limit:
+- encapsulate the tic-tac-toe logic in handleClick within an if-statement that tests whether the numMoves is < 6. This is so the first 6 moves uses tic-tac-toe logic
+- add two else-ifs that will be called when numMoves >= 6. One will hold the logic for the first click, and the other will hold the logic for the second click
+
+Changing handleClick:
+- the first else if condition is (squares[i] == (this.state.xIsNext ? 'X' : 'O'))
+  - this is because no matter whether it's the first or second click, we want to treat a click on the correct X or O as a first click. This is in case the user wants to switch their choice to another X or O to avoid an invalid selection
+- inside the first else if: set the selectedRow and selectedCol, and firstClick
+  - selectedRow: parseInt(i/3), use parseInt to do integer division and get the row number
+  - selectedCol: i%3, use modulus to get the leftovers, which is the col number
+  - firstClick: false because a source has been chosen and its ok to choose a destination
+
+- the second else if condition will be (!this.state.firstClick), because we only want it to run if a source has been selected
+  - let rowDiff = Math.abs(parseInt(i/3) - this.state.selectedRow);
+  - let colDiff = Math.abs((i%3) - this.state.selectedCol);
+  - if these differences are <= 1, we know that the destination is valid, so set the squares[i] to the correct symbol, and make the source location null. Also set firstClick back to true
+
+- I set alert statements under each different branch in order to tell what was working and what wasn't
+
+- Now, the game should run like normal for the first 3 moves from each player, than switch to being able to move letters around. We still need to add the restrictions on movement, however
+- inside the second else if (the one that called for the second click), set a variable inCenter to be true if the center character is the current player's letter
+  	 let inCenter = (this.state.xIsNext ? 'X' : 'O') == squares[4];
+- inside the second else if, add an if statement before the setState() command is called.
+              if(inCenter && (calculateWinner(squares) == null && squares[4] != null)) {
+                alert("Invalid Move! You must either win or vacate the center!")
+                return;
+            }
+  - if the player had the center location, this will make sure to not make the move if it did not either result in a win or vacate the center
+
+Implementing History:
+- for fun, if you want the history to work, change the this.state.numMoves < 6 to this.state.stepNumber < 6, in order to be able to go back in time to the tic tac toe part as well. Also, in the second click part of the handleClick method, set the history variable using the same logic as the tutorial
+
+
+
+Challenges:
+- when I first implemented the row and column numbers, I messed up the conversion from array index to row and column
+- I forgot to put in a winner check for the second phase, so the game continued even after someone won
+
+
+npm pack --dry-run output:
+justinhee@Justins-MacBook-Pro chorus-lapilli % npm pack --dry-run
+npm notice 
+npm notice 📦  chorus-lapilli@0.1.0
+npm notice === Tarball Contents === 
+npm notice 739B  src/index.css       
+npm notice 1.7kB public/index.html   
+npm notice 3.9kB public/favicon.ico  
+npm notice 4.9kB src/index.js        
+npm notice 492B  public/manifest.json
+npm notice 817B  package.json        
+npm notice 3.4kB README.md           
+npm notice 5.3kB public/logo192.png  
+npm notice 9.7kB public/logo512.png  
+npm notice 67B   public/robots.txt   
+npm notice === Tarball Details === 
+npm notice name:          chorus-lapilli                          
+npm notice version:       0.1.0                                   
+npm notice filename:      chorus-lapilli-0.1.0.tgz                
+npm notice package size:  23.7 kB                                 
+npm notice unpacked size: 31.0 kB                                 
+npm notice shasum:        ce2f290b35781ace3616d47385d23c1ae9940dcb
+npm notice integrity:     sha512-pZ2B8rJx92CPE[...]OWY00lanmJvHQ==
+npm notice total files:   10                                      
+npm notice 
+chorus-lapilli-0.1.0.tgz

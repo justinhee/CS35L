@@ -1,0 +1,167 @@
+Justin Hee
+Professor Eggert
+CS 35L
+28 April 2021
+
+Tic-Tac-Toe Notes
+
+- installed the most recent version of node.js from nodejs.org
+- created a new react app using npx create-react-app my-app
+- delete src files and add index.css and index.js with the specified code from the tutorial https://reactjs.org/tutorial/tutorial.html
+- open in vscode
+- npm start and view localhost:3000 in browser; it shows an empty tic-tac-toe field
+- go to index.js and modify the renderSquare method to pass a props "value" to the Square
+- inside Square, put this.props.value into the button area
+- running again, each square is labeled with a number from 0-9
+- add onClick=(function() {alert('click'); into the button component's tag. Now, each time you click a square the browser sends an alert
+- now switch out this expression with a new one using arrow function syntax (=>) to make it more compact
+      () => {alert('click');}
+      this function is only called after a click
+      
+- take out () => and see what happens: this calls an alert every time the site is reloaded
+- add a state component to Square using a constructor, and initialize value to null
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: null,
+    };
+  }
+
+- replace this.props.value to this.state.value, and replace the alert inside the onClick to an expression changing this.state.value to 'X'
+- install React DevTools to inspect the React component tree, 'inspect' an element and go to the components tab
+- lift the state components up; you want to store the data of the square components in the board component
+- add a constructor to the board component and add a 'squares' value that is an array of 9 elements initialized to null
+  constructor(props) {
+    super(props);
+    this.state = {
+      squares: Array(9).fill(null),
+    };
+  }
+- change the renderSquare method to read from the board's squares state by inserting this.state.squares[i] instead of value = {i}
+- modify the renderSquare method to allow the square itself to call a function to update the board: add an onClick prop to the Square and assign it a function handClick(i)
+- in square's render method, change this.state.value back to this.props.value in order to take the value passed from board
+- in square's render method, change the this.setState() to this.props.onClick() to call the function passed to it
+- delete the constructor from Swuare because it doesn't have to keep track of the states anymore
+- since we haven't defined handleClick yet, the code will crash
+- aside: onClick is only special to the button component, the custom class square could have any name for its values. However, it is convention to use on[Event] and handle[Event] naming schemes
+- add the handleClick method to the board class. First you create a copy of the squares array, then change it, then reassign the state. This is because we want to keep previous versions intact in order to go back in time later
+  handleClick(i) {
+    const squares = this.state.squares.slice();
+    squares[i] = 'X';
+    this.setState({squares: squares});
+  }
+  
+- switch Square into a function component because it only contains a render method and doesnt have a state
+  - change it to function Square(props) as a heading, remove render(), switch this.props to just props, and change the arrow function to just ={props.onClick}
+  
+- create a new state in Board, xIsNext, and initialize it to true. Flip this value each time handleClick is called. Also use a ternary statement when you set squares[i] to switch between X and O depending on xIsNext. Modify the 'status' text in Board's render() reflect this, using a similar ternary statement
+      const squares = this.state.squares.slice();
+    squares[i] = this.state.xIsNext ? 'X' : 'O';
+    this.setState({
+      squares: squares,
+      xIsNext: !this.state.xIsNext,
+    });
+  
+- copy the helper function calculateWinner(squares) into the end of the file. This appears to list all the possible index combinations for a win, and check if they are any of the combos are all the same value
+  function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
+
+- add a conditional statement at the beginning of the Board's render() method in order to either set the status to a winner message, or the next player
+  const winner = calculateWinner(this.state.squares);
+    let status;
+    if (winner) {
+      status = 'Winner: ' + winner;
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
+    
+- add a check in the handleClick() method to return early if either the calculateWinner() or squares[i] is not null, meaning the game is over or the square is already filled
+  if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    
+- run the game, and it should work like a normal tic tac toe game. You have to reload to restart the game whenever someone ties or wins
+
+- lift up the squares state from the Board to the Game component in order to have give it full control over everything. Also add a history array to store previous turns
+  - create a constructor for the Game component that initializes state values for history and xIsNext
+      constructor(props) {
+    super(props);
+    this.state = {
+      history: [{
+        squares: Array(9).fill(null),
+      }],
+      xIsNext: true,
+    };
+  }
+  
+  - delete the Board constructor and replace this.state with this.props in Board's renderSquare
+  - replace this.handleClick(i) to this.props.onClick(i) in Board's renderSquare
+  - update Game's render() to use the most recent history entry as the current game board
+          <Board
+            squares={current.squares}
+            onClick={(i) => this.handleClick(i)}
+          />
+  - move the Board's status message conditionals to the Game's render method, using the most recent history entry as the board
+  - move the logic for handleClick into Game from Board, but modify it so that it uses the most recent history entry as the current board, and concatenates the changes onto the history array. Delete handleClick from Board because it is not needed
+  handleClick(i) {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? 'X' : 'O';
+    this.setState({
+      history: history.concat([{
+        squares: squares,
+      }]),
+      xIsNext: !this.state.xIsNext,
+    });
+  }
+  
+- create a way to show the past moves
+  - use a map method to assign the history of moves to React buttons on the screen, put this in Game's render()
+    const moves = history.map((step, move) => {
+      const desc = move ?
+        'Go to move #' + move :
+        'Go to game start';
+      return (
+        <li>
+          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+        </li>
+      );
+    });
+  - this creates a button for each move in history, <li> is a list item, these are all put inside <ol>, and ordered list
+  - go to Game's render method, and add a key to the <li> element, so <li key={move}>
+  - because clicking any list buttons throws an error, we must implement jumpTo
+    - add stepNumber: 0 to the initial Game state
+    - in jumpTo, set the stepNumber to the given step, and adjust xIsNext to be true if it's an even step
+    jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+    });
+  }
+  - make sure that handleClick updates stepNumber in its setState() argument
+  - replace this.state.history with this.state.history.slice(0, this.state.stepNumber + 1), which makes sure that if you go back in time only the previous steps will be available
+
+- change the Game's render so that it displays the current stepNumber rather than the last element
+  const current = history[this.state.stepNumber];
+- now the game should run as intended, with the playable board as well as the history column on the right
